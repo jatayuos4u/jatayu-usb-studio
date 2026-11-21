@@ -1,0 +1,28 @@
+[Unit]
+Description=Jatayu USB Studio bounded read-only system D-Bus inspection (opt-in)
+Documentation=https://jatayuos.in
+After=dbus.service
+
+[Service]
+Type=simple
+User=jatayu-usb-preview
+Group=jatayu-usb-preview
+WorkingDirectory=/usr/lib/jatayu-usb-studio
+ExecStart=/usr/bin/python3 -s -E /usr/lib/jatayu-usb-studio/beta86_service_inspection.py
+Restart=on-failure
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+[Install]
+# Intentionally no WantedBy: manual opt-in only after review.

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Jatayu USB Studio
+Comment=USB management utility for JatayuOS
+Exec=jatayu-usb-studio
+Icon=jatayu-usb-studio
+StartupWMClass=jatayu-usb-studio
+Categories=System;
+Terminal=false

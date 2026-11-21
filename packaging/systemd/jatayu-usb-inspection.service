@@ -1,0 +1,28 @@
+[Unit]
+Description=Jatayu USB Studio non-writing system D-Bus inspection preview
+Documentation=https://jatayuos.in
+After=dbus.service
+
+[Service]
+Type=simple
+User=jatayu-usb-preview
+Group=jatayu-usb-preview
+WorkingDirectory=/usr/lib/jatayu-usb-studio
+ExecStart=/usr/bin/python3 -I /usr/lib/jatayu-usb-studio/system_service.py
+Restart=no
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+[Install]
+# Intentionally no WantedBy: manual opt-in only after review.
