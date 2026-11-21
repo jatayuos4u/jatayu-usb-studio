@@ -44,3 +44,7 @@ The package appears under `packages/`. To launch the compiled application direct
 The release test command retains the historical tests and deselects the exact Beta 93 source-text assertions listed in `tests/beta93-only-tests.txt`. Those assertions require superseded version strings, disabled controls, prototype installation paths, or preview-only workflows. The historical test fixtures and prototypes remain in the source. See the [changelog](CHANGELOG.md) for the release and development summary.
 
 See `RELEASE-NOTES.md`, `HARDWARE-VALIDATION.md` and `SECURITY-AUDIT.md` before testing on disposable USB drives.
+
+## License and credits
+
+The original Jatayu USB Studio code and documentation are licensed under the [MIT License](LICENSE). See [Credits](CREDITS.md) and [Third-party notices](THIRD_PARTY_NOTICES.md) for attribution and dependency information. The project license covers the original code and documentation. Bundled artwork and icons are outside that grant pending confirmation of their terms.
