@@ -425,3 +425,25 @@ def test_windows_iso_is_rejected_before_usb_open(disks, monkeypatch):
     with pytest.raises(studio.UnsafeTarget, match='Windows installer ISO'):
         studio.disk_operation(args, no_progress, not_cancelled)
     assert modes == []
+
+
+@pytest.mark.parametrize('declared_size', [0, 128])
+def test_download_size_limit_cleans_up(tmp_path, monkeypatch, declared_size):
+    monkeypatch.setattr(studio, 'MAX_ISO_DOWNLOAD_BYTES', 64)
+    with pytest.raises(ValueError, match='download exceeds'):
+        download(tmp_path, Response(bytes(128), length=declared_size))
+    assert not list(tmp_path.iterdir())
+
+
+def test_download_deadline_cleans_up(tmp_path):
+    import time
+
+    class SlowResponse(Response):
+        def read1(self, size):
+            time.sleep(5)
+            return super().read1(size)
+
+    with pytest.raises(TimeoutError, match='time limit'):
+        with studio.download_deadline(0.05):
+            download(tmp_path, SlowResponse(iso_bytes()))
+    assert not list(tmp_path.iterdir())

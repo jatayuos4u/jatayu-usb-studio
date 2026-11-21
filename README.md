@@ -1,4 +1,4 @@
-# Jatayu USB Studio 1.1.0 RC1
+# Jatayu USB Studio 1.1.0
 
 USB imaging and filesystem management for Debian 13 AMD64 and KDE Plasma 6. The Qt6 application preserves the JatayuOS dashboard, dark-blue shell, branding, and original navigation. Downloads adds HTTPS ISO retrieval and a handoff to Create Bootable USB.
 
@@ -7,7 +7,7 @@ USB imaging and filesystem management for Debian 13 AMD64 and KDE Plasma 6. The 
 Open a terminal in the directory containing the package.
 
 ```bash
-sudo apt install './jatayu-usb-studio_1.1.0~rc1-21_amd64.deb'
+sudo apt install './jatayu-usb-studio_1.1.0-1_amd64.deb'
 jatayu-usb-studio --version
 ```
 

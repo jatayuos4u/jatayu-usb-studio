@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import re
 import select
+import signal
 import ssl
 import stat
 import struct
@@ -27,6 +28,8 @@ from udisks2_backend import inspect_usb, object_path
 from verified_write_transaction import transfer_and_verify
 
 CHUNK = 1024 * 1024
+MAX_ISO_DOWNLOAD_BYTES = 16 * 1024**3
+ISO_DOWNLOAD_SECONDS = 2 * 60 * 60
 BLKGETSIZE64 = 0x80081272  # Linux AMD64 _IOR(0x12, 114, size_t)
 BLKGETDISKSEQ = 0x80081280  # Linux AMD64 _IOR(0x12, 128, __u64)
 SERVICE = 'org.freedesktop.UDisks2'
@@ -540,6 +543,21 @@ class HttpsRedirect(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
+@contextmanager
+def download_deadline(seconds):
+    """Bound the complete CLI transfer, including HTTPS connection and headers."""
+    def expired(_number, _frame):
+        raise TimeoutError('ISO download exceeded the time limit')
+
+    previous = signal.signal(signal.SIGALRM, expired)
+    try:
+        signal.setitimer(signal.ITIMER_REAL, seconds)
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous)
+
+
 def download_iso(url, directory, progress, cancelled, *, opener=None):
     target = https_url(url)
     name = urllib.parse.unquote(target.path.rsplit('/', 1)[-1])
@@ -562,6 +580,8 @@ def download_iso(url, directory, progress, cancelled, *, opener=None):
             total = int(response.headers.get('Content-Length', 0))
             if response.status != 200 or total < 0:
                 raise ValueError('Server did not return a complete ISO response')
+            if total > MAX_ISO_DOWNLOAD_BYTES:
+                raise ValueError('ISO download exceeds the 16 GiB limit')
             private_fd = os.open(private, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
             try:
                 scratch = os.open('download', os.O_CREAT | os.O_EXCL | os.O_RDWR, 0o600, dir_fd=private_fd)
@@ -573,6 +593,8 @@ def download_iso(url, directory, progress, cancelled, *, opener=None):
                         block = response.read1(CHUNK)
                         if not block:
                             break
+                        if len(block) > MAX_ISO_DOWNLOAD_BYTES - done:
+                            raise ValueError('ISO download exceeds the 16 GiB limit')
                         output.write(block)
                         digest.update(block)
                         done += len(block)
@@ -651,7 +673,8 @@ def main():
         cancelled = args.cancel_file.is_file
         check_cancel(cancelled)
         if args.operation == 'download':
-            result = download_iso(args.url, args.directory, progress, cancelled)
+            with download_deadline(ISO_DOWNLOAD_SECONDS):
+                result = download_iso(args.url, args.directory, progress, cancelled)
         elif args.operation == 'inspect':
             identity = inspect_selection(args.device, args.sequence)
             result = {'status': 'SAFETY_CHECKED',

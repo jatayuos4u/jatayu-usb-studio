@@ -62,7 +62,7 @@
 #include <algorithm>
 #include <memory>
 
-static constexpr char studioVersion[] = "1.1.0 RC1";
+static constexpr char studioVersion[] = "1.1.0";
 struct Partition { QString path, fs; quint64 bytes; };
 
 struct Drive { QString path, name, size, detail, partitionSummary, identity, sequence; QList<Partition> partitions; QString filesystem; quint64 bytes=0; bool mounted=false, readOnly=false; };
@@ -243,7 +243,7 @@ class Studio:public QMainWindow {
     QByteArray demoBuffer;
 public:
     Studio(){
-        setWindowTitle(QString("Jatayu USB Studio v")+studioVersion+" · package revision 21");setWindowIcon(QIcon(":/assets/icon.png"));
+        setWindowTitle(QString("Jatayu USB Studio v")+studioVersion+"");setWindowIcon(QIcon(":/assets/icon.png"));
         resize(1366,780);setMinimumSize(900,600);
         auto *root=new QWidget;setCentralWidget(root);auto *outer=new QVBoxLayout(root);outer->setContentsMargins(0,0,0,0);outer->setSpacing(0);
         auto *body=new QWidget;auto *horizontal=new QHBoxLayout(body);horizontal->setContentsMargins(0,0,0,0);horizontal->setSpacing(0);
@@ -259,7 +259,7 @@ public:
         sl->addStretch();horizontal->addWidget(side);
         pages=new QStackedWidget;pages->setObjectName("pages");horizontal->addWidget(pages,1);outer->addWidget(body,1);
         auto *footer=frame("footer");auto *fl=new QHBoxLayout(footer);fl->setContentsMargins(20,9,20,9);
-        fl->addWidget(txt(QString("●  Jatayu USB Studio v")+studioVersion+" · package revision 21",10,true,"#ffffff"));
+        fl->addWidget(txt(QString("●  Jatayu USB Studio v")+studioVersion+"",10,true,"#ffffff"));
         status=txt("Ready",10,false,"#dbe7ff");fl->addWidget(status);fl->addStretch();
         backendStatus=txt("Backend: checking...",10,true,"#ffdb81");
         backendStatus->setToolTip("UDisks2 availability does not grant USB access");
@@ -559,7 +559,7 @@ private:
         // UDisks2 availability is independent of the optional Jatayu inspection service.
         // Never interpret this read-only probe as authorization to write.
         auto *probe=new QProcess(this);
-        probe->setProgram("busctl");
+        probe->setProgram("/usr/bin/busctl");
         probe->setArguments({"--system","--timeout=3s","get-property",
             "org.freedesktop.UDisks2","/org/freedesktop/UDisks2/Manager",
             "org.freedesktop.UDisks2.Manager","Version"});
@@ -582,7 +582,7 @@ private:
     void probeBackend(){
         if(backendProbe)return; // Never overlap polls.
         auto *proc=new QProcess(this);backendProbe=proc;
-        proc->setProgram("busctl");
+        proc->setProgram("/usr/bin/busctl");
         proc->setArguments({"--system","--timeout=3s","call",
             "in.jatayuos.USBStudio.Inspection","/in/jatayuos/USBStudio/Inspection",
             "in.jatayuos.USBStudio.Inspection1","Capabilities"});
@@ -764,11 +764,26 @@ private:
         identity->addWidget(txt("Jatayu USB Studio",26,true,"#FFFFFF"));
         identity->addWidget(txt("Create, verify and manage USB media on JatayuOS.",11,false,"#D9E8FF"));
         identity->addWidget(txt("Created by Anup Kumar Yadav",11,true,"#FFFFFF"));
-        identity->addWidget(txt(QString(studioVersion)+" · Package revision 21 · Debian 13 / KDE Plasma 6",10,false,"#D9E8FF"));
+        identity->addWidget(txt(QString(studioVersion)+" · Debian 13 / KDE Plasma 6",10,false,"#D9E8FF"));
         auto *website=new QPushButton("Visit jatayuos.in");
         website->setObjectName("aboutWebsite");
         identity->addWidget(website,0,Qt::AlignLeft);
         connect(website,&QPushButton::clicked,this,[]{QDesktopServices::openUrl(QUrl("https://jatayuos.in"));});
+        identity->addWidget(txt("MIT License for the original code and documentation",10,false,"#D9E8FF"));
+        auto *legalLinks=new QHBoxLayout;
+        const QString github="https://github.com/jatayuos4u/jatayu-usb-studio/blob/main/";
+        for(const auto &link : QList<QPair<QString,QString>>{
+                {"MIT License","LICENSE"}, {"Credits","CREDITS.md"},
+                {"Third-party notices","THIRD_PARTY_NOTICES.md"}}){
+            auto *button=new QPushButton(link.first);
+            button->setObjectName("aboutWebsite");
+            legalLinks->addWidget(button);
+            connect(button,&QPushButton::clicked,this,[url=QUrl(github+link.second)]{
+                QDesktopServices::openUrl(url);
+            });
+        }
+        legalLinks->addStretch();
+        identity->addLayout(legalLinks);
         header->addLayout(identity,1);
         layout->addWidget(hero);
 
@@ -1370,7 +1385,7 @@ private:
             if(!generation.isEmpty())sequences.insert(name,generation);
         }
         scan=new QProcess(this);auto *p=scan;
-        p->setProgram("lsblk");p->setArguments(usbLsblkArguments());
+        p->setProgram("/usr/bin/lsblk");p->setArguments(usbLsblkArguments());
         // A stalled lsblk must never leave an old MATCHED state on screen.
         auto timedOut=std::make_shared<bool>(false);
         QTimer::singleShot(6000,this,[this,p,timedOut]{

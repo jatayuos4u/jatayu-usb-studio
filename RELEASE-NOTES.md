@@ -1,6 +1,6 @@
-# Jatayu USB Studio 1.1.0 RC1 release notes
+# Jatayu USB Studio 1.1.0 release notes
 
-The Debian 13 AMD64 package is version `1.1.0~rc1-21`. The application, About page and `--version` report **1.1.0 RC1**. The Debian revision sorts after the earlier `1.1.0~rc1` package.
+The Debian 13 AMD64 package is version `1.1.0-1`. The application, About page and `--version` report **1.1.0**. This stable package supersedes the revision 21 pre-release.
 
 - Create Bootable USB checks and stages a local ISO 9660 image, obtains a UDisks2 descriptor and verifies the written image prefix with SHA-256.
 - Windows installer mode prepares x64 UEFI FAT32 media and splits oversized install.wim files. Verification compares the prepared image with the USB. Firmware boot must be tested separately.
@@ -12,7 +12,7 @@ The Debian 13 AMD64 package is version `1.1.0~rc1-21`. The application, About pa
 
 ## Known limitations
 
-- Hardware validation and the live KDE/Polkit authorization flow are pending. This RC is intended for disposable-media testing before ISO inclusion.
+- Hardware validation and the live KDE/Polkit authorization flow are pending. This build is intended for disposable-media testing before ISO inclusion.
 - USB workflows require the kernel and `lsblk` to identify the disk as removable USB. USB SSDs and bridges reporting fixed media are rejected. The current safety policy also rejects hardware read-only media. Mounted, active swap, or held devices must be released outside the app.
 - Formatting creates a whole-device filesystem and overwrites the full disk. It currently requires 512-byte logical sectors. Some older devices expect a partition table and may reject this layout.
 - ISO detection checks the ISO 9660 descriptor and declared size. It cannot establish firmware bootability. Use a publisher-provided hybrid ISO and verify the publisher's checksum separately. ISO writes compare only the written prefix. A clone to a larger disk keeps the source layout, so GPT or filesystem expansion can require a separate tool.

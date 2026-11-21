@@ -66,6 +66,10 @@ int testStudioNavigation(QApplication &app) {
     for(auto *label:pages->widget(8)->findChildren<QLabel *>())about<<label->text();
     for(const QString &required:QStringList{"Created by Anup Kumar Yadav","Create Bootable USB","Did the simulation write my ISO?","Why was baseline capture refused?"})
         if(!about.contains(required))return 14;
+    QStringList legalButtons;
+    for(auto *button:pages->widget(8)->findChildren<QPushButton *>())legalButtons<<button->text();
+    for(const auto &name:QStringList{"MIT License","Credits","Third-party notices"})
+        if(!legalButtons.contains(name))return 21;
     auto *help=pages->widget(8)->findChild<QTabWidget *>();
     if(!help || help->count()!=3 || help->tabText(0)!="About this tool" || help->tabText(1)!="How to use" || help->tabText(2)!="FAQ")return 15;
     help->setCurrentIndex(2);
@@ -74,7 +78,7 @@ int testStudioNavigation(QApplication &app) {
     for (auto *picker : pages->widget(3)->findChildren<QComboBox *>())
         ntfs = ntfs || picker->findData("ntfs") >= 0;
     if (!ntfs) return 6;
-    if (!window.windowTitle().contains("v1.1.0 RC1")) return 5;
+    if (!window.windowTitle().contains("v1.1.0")) return 5;
     Drive first, second;
     first.path="/dev/sdb"; first.sequence="1"; first.bytes=100;
     second.path="/dev/sdc"; second.sequence="2"; second.bytes=200;
